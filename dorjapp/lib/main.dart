@@ -1,6 +1,16 @@
-import 'package:flutter/material.dart';
+import 'dart:developer';
 
-void main() {
+import 'package:dorjapp/firebase_options.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -47,9 +57,11 @@ class MyHomePage extends StatefulWidget {
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
+bool isSignedIn = false;
+User? currentUser;
+
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
-
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -63,6 +75,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    FirebaseAuth.instance.authStateChanges().listen((User? user) {
+      if (user == null) {
+        setState(() {
+          isSignedIn = false;
+        });
+      } else {
+        setState(() {
+          isSignedIn = true;
+          currentUser = FirebaseAuth.instance.currentUser;
+        });
+      }
+    });
     // This method is rerun every time setState is called, for instance as done
     // by the _incrementCounter method above.
     //
@@ -102,6 +126,30 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headline4,
             ),
+            ElevatedButton(
+              onPressed: () async {
+                if (isSignedIn) {
+                  await FirebaseAuth.instance.signOut();
+                } else {
+                  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+
+                  // Obtain the auth details from the request
+                  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
+
+                  // Create a new credential
+                  final credential = GoogleAuthProvider.credential(
+                    accessToken: googleAuth?.accessToken,
+                    idToken: googleAuth?.idToken,
+                  );
+
+                  // Once signed in, return the UserCredential
+                  final userCredentials = await FirebaseAuth.instance.signInWithCredential(credential);
+                }
+              },
+              child: Text(isSignedIn ? 'Cerrar sesión' : 'Iniciar sesión'),
+            ),
+            if (isSignedIn) Text(currentUser?.displayName ?? ''),
+            if (isSignedIn && currentUser?.photoURL != null) Image.network(currentUser!.photoURL!),
           ],
         ),
       ),
