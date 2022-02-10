@@ -1,163 +1,117 @@
-import 'dart:developer';
-
+import 'package:dorjapp/data/repositories/firebase_auth_repository.dart';
+import 'package:dorjapp/domain/blocs/authentication/authentication_bloc.dart';
+import 'package:dorjapp/domain/blocs/authentication/authentication_state.dart';
 import 'package:dorjapp/firebase_options.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:dorjapp/resources/colors.dart';
+import 'package:dorjapp/ui/pages/home/home_page.dart';
+import 'package:dorjapp/ui/pages/janijim/janij_form_page.dart';
+import 'package:dorjapp/ui/pages/janijim/janijim_page.dart';
+import 'package:dorjapp/ui/pages/login/login_page.dart';
+import 'package:dorjapp/ui/pages/madrijim/madrij_form_page.dart';
+import 'package:dorjapp/ui/pages/madrijim/madrijim_page.dart';
+import 'package:dorjapp/ui/widgets/loading_indicator.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:google_sign_in/google_sign_in.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const MyApp());
+  runApp(const App());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({Key? key, required this.title}) : super(key: key);
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-bool isSignedIn = false;
-User? currentUser;
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+class App extends StatelessWidget {
+  const App({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      if (user == null) {
-        setState(() {
-          isSignedIn = false;
-        });
-      } else {
-        setState(() {
-          isSignedIn = true;
-          currentUser = FirebaseAuth.instance.currentUser;
-        });
-      }
-    });
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
-    return Scaffold(
-      appBar: AppBar(
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
-      ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Invoke "debug painting" (press "p" in the console, choose the
-          // "Toggle Debug Paint" action from the Flutter Inspector in Android
-          // Studio, or the "Toggle Debug Paint" command in Visual Studio Code)
-          // to see the wireframe for each widget.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headline4,
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (isSignedIn) {
-                  await FirebaseAuth.instance.signOut();
-                } else {
-                  final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+    final authRepository = FirebaseAuthRepository();
 
-                  // Obtain the auth details from the request
-                  final GoogleSignInAuthentication? googleAuth = await googleUser?.authentication;
-
-                  // Create a new credential
-                  final credential = GoogleAuthProvider.credential(
-                    accessToken: googleAuth?.accessToken,
-                    idToken: googleAuth?.idToken,
-                  );
-
-                  // Once signed in, return the UserCredential
-                  final userCredentials = await FirebaseAuth.instance.signInWithCredential(credential);
-                }
-              },
-              child: Text(isSignedIn ? 'Cerrar sesión' : 'Iniciar sesión'),
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider<FirebaseAuthRepository>.value(value: authRepository),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (context) => AuthenticationBloc(
+              authRepository: authRepository,
             ),
-            if (isSignedIn) Text(currentUser?.displayName ?? ''),
-            if (isSignedIn && currentUser?.photoURL != null) Image.network(currentUser!.photoURL!),
-          ],
+            lazy: false,
+          ),
+        ],
+        child: MaterialApp(
+          title: 'DorjApp',
+          theme: ThemeData(
+            appBarTheme: const AppBarTheme(
+              centerTitle: true,
+              color: AppColors.primary,
+            ),
+          ),
+          initialRoute: '/',
+          onGenerateRoute: (settings) {
+            switch (settings.name) {
+              case '/':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                      builder: (context, state) {
+                        return state.maybeWhen(
+                          orElse: () => const Scaffold(
+                            body: Center(
+                              child: LoadingIndicator(),
+                            ),
+                          ),
+                          failed: () => const Scaffold(
+                            body: Center(
+                              child: Text('Failed'),
+                            ),
+                          ),
+                          authenticated: () => const HomePage(),
+                          unauthenticated: () => const LoginPage(),
+                        );
+                      },
+                    );
+                  },
+                );
+              case '/login':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const LoginPage();
+                  },
+                );
+              case '/janijim':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const JanijimPage();
+                  },
+                );
+              case '/madrijim':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const MadrijimPage();
+                  },
+                );
+              case '/madrijForm':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const MadrijFormPage();
+                  },
+                );
+              case '/janijForm':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const JanijFormPage();
+                  },
+                );
+              default:
+                return null;
+            }
+          },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

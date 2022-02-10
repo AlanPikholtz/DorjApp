@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "61174269322",
+    "project_id": "juventud-dorjadash",
+    "storage_bucket": "juventud-dorjadash.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:61174269322:android:ceb34faea0e2c1d0e6b473",
+        "android_client_info": {
+          "package_name": "com.aupikholtz.dorjapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "61174269322-s5qf0hu9lnv9iau55k95rf728v62b43b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCHxlVXwyWf60x-ASgl_pz9xfKS3hdVpKY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "61174269322-s5qf0hu9lnv9iau55k95rf728v62b43b.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "61174269322-2ke1t5ksi7o8kkfi5s6c7c7rmed9esg4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.aupikholtz.dorjapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

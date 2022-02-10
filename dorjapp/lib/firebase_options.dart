@@ -42,7 +42,7 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyCHxlVXwyWf60x-ASgl_pz9xfKS3hdVpKY',
-    appId: '1:61174269322:android:75dc3eace7ac5ad9e6b473',
+    appId: '1:61174269322:android:ceb34faea0e2c1d0e6b473',
     messagingSenderId: '61174269322',
     projectId: 'juventud-dorjadash',
     storageBucket: 'juventud-dorjadash.appspot.com',
