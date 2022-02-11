@@ -3,6 +3,7 @@ import 'package:dorjapp/domain/blocs/authentication/authentication_bloc.dart';
 import 'package:dorjapp/domain/blocs/authentication/authentication_state.dart';
 import 'package:dorjapp/firebase_options.dart';
 import 'package:dorjapp/resources/colors.dart';
+import 'package:dorjapp/ui/pages/grupos/grupos_page.dart';
 import 'package:dorjapp/ui/pages/home/home_page.dart';
 import 'package:dorjapp/ui/pages/janijim/janij_form_page.dart';
 import 'package:dorjapp/ui/pages/janijim/janijim_page.dart';
@@ -104,6 +105,12 @@ class App extends StatelessWidget {
                 return MaterialPageRoute<void>(
                   builder: (context) {
                     return const JanijFormPage();
+                  },
+                );
+              case '/groups':
+                return MaterialPageRoute<void>(
+                  builder: (context) {
+                    return const GroupsPage();
                   },
                 );
               default:
